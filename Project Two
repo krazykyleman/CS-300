@@ -1,0 +1,213 @@
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+
+struct Course {                                                          // variables
+
+    string courseNumber;
+    string name;
+    vector<string> prerequisites;
+
+};
+
+
+vector<string> tokenize(string s, string del = " ") {                    //This will split the lines of text into usable lines that the program will be able to output
+
+    vector<string> stringArray;
+
+    int start = 0;                                                       // start variable init at 0
+    int end = s.find(del);                                               // end variable set to s finding when delete (or space) is found
+
+    while (end != -1) {                                                  //while end isn't equal to negative one or last set of data
+
+        stringArray.push_back(s.substr(start, end - start));             // adds new string to end of the string array. Starts at position start and spans the length of end minus start
+        start = end + del.size();                                        // updates size to end plus the size of delete variable
+        end = s.find(del, start);                                        // updates end to search string s to find delete at pos start
+
+    }
+
+    stringArray.push_back(s.substr(start, end - start));                 // adds new string to end of the string array. Starts at position start and spans the length of end minus start
+
+    return stringArray;                                                  //return stringArray
+
+}
+
+
+vector<Course> LoadDataStructure() {                                     //Loads files and stores data
+
+    ifstream fin("abcu.txt", ios::in);                                   // reads the abcu text file provided, as input
+    vector<Course> courses;                                              // new Course vector created as courses
+    string line;                                                         // variable line is created as a string
+
+    while (1) {                                                          // while true will run until break, set to false, or memory runs out lol
+
+        getline(fin, line);                                              // gets information from file input and adds to string line
+
+        if (line == "-1") {                                              //If the line is -1 (end of file) then...
+
+            break;                                                       //...break loop
+
+        }
+
+        Course course;                                                   //make new Course named course
+
+        vector<string> tokenInfo = tokenize(line, ",");                  // sets new string token information to size of token from line and is seperated by commas
+
+        course.courseNumber = tokenInfo[0];                              //course courseNumber is set to tokenInfo at beginninng or 0
+
+        course.name = tokenInfo[1];                                      // course name is set to tokenInfo at location 1
+
+        for (int i = 2; i < tokenInfo.size(); i++) {                     // for loop as long as i is less than size of tokenInfo
+
+            course.prerequisites.push_back(tokenInfo[i]);                // adds prereq to end of prereq variable at location i of tokenInfo
+
+        }
+
+        courses.push_back(course);                                       // adds course to end of courses
+
+    }
+
+    fin.close();                                                         // closes abcu file
+
+    return courses;                                                      // returns courses variable
+
+}
+
+
+void printCourse(Course course) {                                        // will print course information in required formatting
+
+    string courseNumber = course.courseNumber;                           // course number is set to course argument but it's the coursenumber
+    string name = course.name;                                           // name is set to inputted course name from course
+    vector<string> prerequisites = course.prerequisites;                 // prereqs are set to the inputted course prereqs from course variable
+
+    cout << "Course Number: " << courseNumber << endl;                   // reads the course number to user
+    cout << "Course Name: " << name << endl;                             // reads the course name to user
+    cout << "Prerequisites: ";                                           // reads prereqs if there are any. No end line as this is connected to the for loop below
+
+    for (int i = 0; i < prerequisites.size(); i++) {                     //for every variable up to size of prereqs
+
+        cout << prerequisites[i] << " ";                                 //output prereq at instance i with a space after
+
+    }
+
+    cout << "\n\n";                                                      // two new line indents for nice looks
+
+}
+
+
+void printCourseList(vector<Course> courses) {                           // Will Print all course information in the correct way
+
+    int n = courses.size();                                              // new integer variable equal to the size of inputted courses arguments
+
+                                                                         // Using bubble sort because list of courses is not a big data set :)
+    for (int i = 0; i < n - 1; i++) {                                    // for every integer i up to one less than the course size
+
+        for (int j = 0; j < n - i - 1; j++) {                            // for every integer j up to n minus i and one
+
+            if (courses[j].courseNumber > courses[j + 1].courseNumber) { // if courses at j is greater than courses at one more than j
+
+                swap(courses[j + 1], courses[j]);                        // swap course j and course after j (j + 1)
+
+            }
+
+        }
+
+    }
+
+                                                                         // traversing list of courses to print all courses information
+    for (int i = 0; i < n; i++) {                                        // for every integer up to size of course
+
+        printCourse(courses[i]);                                         // print the course at part i
+
+    }
+
+}
+
+
+void searchCourse(vector<Course> courses) {                              // search for the course user entered
+
+    int n = courses.size();                                              // new integer n size of course
+    string courseNumber;                                                 // course number string
+    int found = 0;                                                       // new integer found set to 0 by default (will be used for found or not found)
+
+    cout << "Enter courseNumber: ";                                      // prompts user to input course they are searching for
+    cin >> courseNumber;                                                 // takes the input from user and sets it equal to variable courseNumber
+
+    for (int i = 0; i < n; i++) {                                        // for every integer that is less than the size of course list (loops)
+
+        if (courses[i].courseNumber == courseNumber) {                   // if course found then print it
+
+            found = 1;                                                   // set integer variable f to 1 to say that course was found
+
+            printCourse(courses[i]);                                     // prints course information at number of i in loop
+
+            break;                                                       // break
+
+        }
+
+    }
+
+    if (found == 0) {                                                    // if course not found or if found if set to 0
+
+        cout << "Course with given course number not found\n";           // User will get message to let them know course isn't found
+
+    }
+
+}
+
+
+int main(int argc, char** argv) {                                        // main
+
+    vector<Course> courses;                                              // new course vector named courses
+
+                                                                         // Printing menu, gives user prompts to choose from (all on their own line!!)
+
+    cout << "1.Load Data Structure\n";                                   // loads desired data structure
+    cout << "2.Print Course List\n";                                     // prints courses from imported data structure
+    cout << "3.Print Course\n";                                          // prints inputted course
+    cout << "4.Exit\n";                                                  // breaks loop
+
+    int choice;                                                          // new integer variable for storing user choice
+
+    do {                                                                 // loop will break once user enter 4 (do loops until False is returned)
+
+        cout << "\nEnter your choice: ";                                 // asks user to input their choice for menu option
+        cin >> choice;                                                   // takes input from user and stores in integer variable choice
+
+        switch (choice) {                                                //starts the case prompts for menu
+
+        case 1:
+
+            courses = LoadDataStructure();                               // case one calls LoadDataStructure to import data
+            break;                                                       // break
+
+        case 2:
+
+            printCourseList(courses);                                    // case two will print all the courses from importted data
+            break;                                                       // break
+
+        case 3:
+
+            searchCourse(courses);                                       // case 3 will search for a course that is inputted by user
+            break;                                                       // break
+
+        case 4:
+
+            cout << "Exit\n";                                            // case four exits the program
+            break;                                                       // break
+
+        default:
+
+            cout << "Invalid Choice\n";                                  // default case is for if choice is not 1 through 4 or invalid option
+
+        }
+
+    } while (choice != 4);                                               // while loop connects to do for the reason to loop or not, if not entered 4 will continue to loop
+
+    return 0;                                                            // return
+
+}
